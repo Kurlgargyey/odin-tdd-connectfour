@@ -11,19 +11,25 @@ class Game
   end
 
   def run_game
+    turn = 0
+    turn += 1 until process_turn
 
+    puts "The game ended in Turn #{turn}! #{@active_player} won."
   end
 
   def process_turn
+    puts "It's #{@active_player}'s turn."
     move = input_move
     last_move = make_move(move)
-    return if game_over?(move)
+    return true if game_over?(last_move)
 
     @active_player = @players.rotate![0]
+    false
   end
 
   def input_move
     move = -1
+    puts 'Which column would you like to drop your marker into?'
     move = gets.chomp.to_i until move_valid?(move)
     move
   end
@@ -78,16 +84,12 @@ class Game
   def diagonal_hit?(move)
     hits = 1
     hits += scan_left_up(move)
-    puts hits
     hits += scan_right_down(move)
-    puts hits
     return true if hits >= 4
 
     hits = 1
     hits += scan_right_up(move)
-    puts hits
     hits += scan_left_down(move)
-    puts hits
     return true if hits >= 4
 
     false

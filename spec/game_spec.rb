@@ -80,7 +80,9 @@ describe Game do
 
   describe '#input_move' do
     subject(:game_input) { described_class.new }
-
+    before do
+      allow(game_input).to receive(:puts)
+    end
     context 'when the input is a valid column number' do
       before do
         allow(game_input).to receive(:gets).and_return('3')
