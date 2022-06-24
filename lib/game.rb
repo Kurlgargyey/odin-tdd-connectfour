@@ -8,7 +8,6 @@ class Game
     @scores = Hash.new(0)
     @players = %w[X O]
     @active_player = @players[0]
-    @last_move = []
   end
 
   def run_game
@@ -17,7 +16,7 @@ class Game
 
   def process_turn
     move = input_move
-    make_move(move)
+    last_move = make_move(move)
     return if game_over?(move)
 
     @active_player = @players.rotate![0]
@@ -30,26 +29,43 @@ class Game
   end
 
   def make_move(col)
-    return board[col - 1].push(@active_player) unless col_full?(col)
+    unless col_full?(col)
+      add_marker(col)
+      return move_coords(col)
+    end
 
     new_move = input_move
     make_move(new_move)
   end
 
-  def game_over?(move)
+  def game_over?(last_move)
     return true if board_full?
-    #return true if connect_four?
+    return true if connect_four?(last_move)
+
+    false
   end
 
   def board_full?
     board.all? { |col| col.length == @rows }
   end
 
+  def connect_four?(move)
+
+  end
+
   def col_full?(col)
     board[col - 1].length == @rows
   end
 
+  def add_marker(col)
+    board[col - 1].push(@active_player)
+  end
+
   def move_valid?(move)
     move.between?(1, @cols)
+  end
+
+  def move_coords(col)
+    [col - 1, board[col - 1].length - 1]
   end
 end

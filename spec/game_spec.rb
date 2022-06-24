@@ -1,4 +1,4 @@
-require 'game.rb'
+require 'game'
 
 describe Game do
   subject(:game_init) { described_class.new }
@@ -112,7 +112,6 @@ describe Game do
     selected_col = 4
 
     context 'when X is active' do
-      
       before do
         game_move.instance_variable_set(:@active_player, 'X')
       end
@@ -120,27 +119,33 @@ describe Game do
       context 'when there are no other markers in the column' do
         it 'places an X marker in the first place on the column' do
           game_move.make_move(selected_col)
-          expect(game_move.board[selected_col-1].last).to eq('X')
-        end
-      end
-      
-      context 'when the column already has a marker' do
-        
-        before do
-          game_move.board[selected_col-1].push('O')
+          expect(game_move.board[selected_col - 1].last).to eq('X')
         end
 
-        it 'keeps the previous marker' do  
+        it 'returns the coordinates of the executed move' do
+          expect(game_move.make_move(selected_col)).to eq([3, 0])
+        end
+      end
+
+      context 'when the column already has a marker' do
+        before do
+          game_move.board[selected_col - 1].push('O')
+        end
+
+        it 'keeps the previous marker' do
           game_move.make_move(selected_col)
-          expect(game_move.board[selected_col-1].last).to eq('X')
-          expect(game_move.board[selected_col-1][0]).to eq('O')
+          expect(game_move.board[selected_col - 1].last).to eq('X')
+          expect(game_move.board[selected_col - 1][0]).to eq('O')
+        end
+
+        it 'returns the coordinates of the executed move' do
+          expect(game_move.make_move(selected_col)).to eq([3, 1])
         end
       end
 
       context 'when the column is already full' do
-        
         before do
-          6.times{game_move.board[selected_col-1].push('O')}
+          6.times { game_move.board[selected_col - 1].push('O') }
         end
 
         new_move = 3
@@ -156,12 +161,16 @@ describe Game do
 
         it 'makes the new move' do
           game_move.make_move(selected_col)
-          expect(game_move.board[new_move-1].last).to eq('X')
+          expect(game_move.board[new_move - 1].last).to eq('X')
         end
 
         it 'does not make the invalid move' do
-          expect(game_move.board[selected_col-1]).not_to receive(:push)
+          expect(game_move.board[selected_col - 1]).not_to receive(:push)
           game_move.make_move(selected_col)
+        end
+
+        it 'returns the coordinates of the executed move' do
+          expect(game_move.make_move(selected_col)).to eq([2, 0])
         end
 
         context 'when there is another invalid input' do
@@ -176,12 +185,16 @@ describe Game do
 
           it 'makes the new move' do
             game_move.make_move(selected_col)
-            expect(game_move.board[new_move-1].last).to eq('X')
+            expect(game_move.board[new_move - 1].last).to eq('X')
           end
-  
+
           it 'does not make the invalid move' do
-            expect(game_move.board[selected_col-1]).not_to receive(:push)
+            expect(game_move.board[selected_col - 1]).not_to receive(:push)
             game_move.make_move(selected_col)
+          end
+
+          it 'returns the coordinates of the executed move' do
+            expect(game_move.make_move(selected_col)).to eq([2, 0])
           end
         end
       end
@@ -194,6 +207,7 @@ describe Game do
     before do
       allow(game_turn).to receive(:input_move)
       allow(game_turn).to receive(:make_move)
+      allow(game_turn).to receive(:game_over?).and_return(false)
     end
 
     it 'asks for a move' do
@@ -211,6 +225,84 @@ describe Game do
       game_turn.process_turn
       expect(game_turn.instance_variable_get(:@active_player)).not_to be(previous_player)
     end
+
+    context 'if the game ends on that turn' do
+      before do
+        allow(game_turn).to receive(:game_over?).and_return(true)
+      end
+
+      it 'does not swap active player' do
+        previous_player = game_turn.instance_variable_get(:@active_player)
+        game_turn.process_turn
+        expect(game_turn.instance_variable_get(:@active_player)).to be(previous_player)
+      end
+    end
   end
 
+  describe '#game_over?' do
+    subject(:game_end) { described_class.new }
+    last_move = [3, 3]
+
+    context 'when the board is full' do
+      before do
+        7.times { |i| 6.times { game_end.board[i].push(nil) } }
+      end
+
+      it 'returns true' do
+        expect(game_end.game_over?(last_move)).to be true
+      end
+    end
+
+    context 'when the connect 4 is vertical' do
+      before do
+        4.times { game_end.board[3].push('O') }
+      end
+
+      it 'returns true' do
+        expect(game_end.game_over?(last_move)).to be true
+      end
+    end
+
+    context 'when there is no connect 4' do
+      it 'returns false' do
+        last_move = [0, 0]
+        expect(game_end.game_over?(last_move)).to be false
+      end
+    end
+
+    context 'when the connect 4 is horizontal' do
+      before do
+        4.times { |i| game_end.board[i].push('O') }
+        last_move = [3, 0]
+      end
+
+      it 'returns true' do
+        expect(game_end.game_over?(last_move)).to be true
+      end
+    end
+
+    context 'when the connect 4 is diagonal' do
+      before do
+        4.times { |i| i.times { game_end.board[i].push('X') } }
+        4.times { |i| game_end.board[i].push('O') }
+        last_move = [3, 3]
+      end
+
+      it 'returns true' do
+        expect(game_end.game_over?(last_move)).to be true
+      end
+    end
+
+    context 'when the connect 4 is diagonal reversed' do
+      before do
+        4.times { |i| 3 - i.times { game_end.board[i].push('X') } }
+        4.times { |i| game_end.board[i].push('O') }
+        last_move = [3, 0]
+      end
+
+      it 'returns true' do
+        expect(game_end.game_over?(last_move)).to be true
+      end
+    end
+  end
 end
