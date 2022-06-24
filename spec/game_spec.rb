@@ -78,16 +78,16 @@ describe Game do
     expect(game_init).to respond_to(:run_game)
   end
 
-  describe '#get_move' do
+  describe '#input_move' do
     subject(:game_input) { described_class.new }
 
     context 'when the input is a valid column number' do
       before do
         allow(game_input).to receive(:gets).and_return('3')
       end
-    
+
       it 'returns the input' do
-        expect(game_input.get_move).to eql(3)
+        expect(game_input.input_move).to eql(3)
       end
     end
 
@@ -98,11 +98,11 @@ describe Game do
 
       it 'calls #gets until it receives a valid input' do
         expect(game_input).to receive(:gets).exactly(5).times
-        game_input.get_move
+        game_input.input_move
       end
 
       it 'returns the first valid input' do
-        expect(game_input.get_move).to eql(4)
+        expect(game_input.input_move).to eql(4)
       end
     end
   end
@@ -146,11 +146,11 @@ describe Game do
         new_move = 3
 
         before do
-          allow(game_move).to receive(:get_move).and_return(new_move)
+          allow(game_move).to receive(:input_move).and_return(new_move)
         end
 
         it 'asks for another move' do
-          expect(game_move).to receive(:get_move)
+          expect(game_move).to receive(:input_move)
           game_move.make_move(selected_col)
         end
 
@@ -166,11 +166,11 @@ describe Game do
 
         context 'when there is another invalid input' do
           before do
-            allow(game_move).to receive(:get_move).and_return(selected_col, new_move)
+            allow(game_move).to receive(:input_move).and_return(selected_col, new_move)
           end
 
           it 'asks for another move again' do
-            expect(game_move).to receive(:get_move).twice
+            expect(game_move).to receive(:input_move).twice
             game_move.make_move(selected_col)
           end
 
@@ -192,12 +192,12 @@ describe Game do
     subject(:game_turn) { described_class.new }
 
     before do
-      allow(game_turn).to receive(:get_move)
+      allow(game_turn).to receive(:input_move)
       allow(game_turn).to receive(:make_move)
     end
 
     it 'asks for a move' do
-      expect(game_turn).to receive(:get_move)
+      expect(game_turn).to receive(:input_move)
       game_turn.process_turn
     end
 
