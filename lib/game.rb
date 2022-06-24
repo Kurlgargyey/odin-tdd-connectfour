@@ -4,7 +4,7 @@ class Game
   def initialize(cols = 7, rows = 6)
     @cols = cols.to_i.positive? ? cols.to_i : 7
     @rows = rows.to_i.positive? ? rows.to_i : 6
-    @board = Array.new(@cols) { Array.new() }
+    @board = Array.new(@cols) { [] }
     @scores = Hash.new(0)
     @players = %w[X O]
     @active_player = @players[0]
