@@ -264,6 +264,10 @@ describe Game do
     end
 
     context 'when there is no connect 4' do
+      before do
+        game_end.board[0].push('O')
+      end
+
       it 'returns false' do
         last_move = [0, 0]
         expect(game_end.game_over?(last_move)).to be false
