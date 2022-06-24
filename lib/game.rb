@@ -50,7 +50,6 @@ class Game
   end
 
   def connect_four?(move)
-    return if board[move[0]].nil?
     return true if vertical_hit?(move)
     return true if horizontal_hit?(move)
     return true if diagonal_hit?(move)
@@ -77,7 +76,7 @@ class Game
   end
 
   def diagonal_hit?(move)
-
+    hits = 1
   end
 
   def scan_up(move)
