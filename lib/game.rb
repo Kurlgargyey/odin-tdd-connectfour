@@ -77,16 +77,30 @@ class Game
 
   def diagonal_hit?(move)
     hits = 1
+    hits += scan_left_up(move)
+    puts hits
+    hits += scan_right_down(move)
+    puts hits
+    return true if hits >= 4
+
+    hits = 1
+    hits += scan_right_up(move)
+    puts hits
+    hits += scan_left_down(move)
+    puts hits
+    return true if hits >= 4
+
+    false
   end
 
   def scan_up(move)
     hits = 0
     marker = board[move[0]][move[1]]
     col = move[0]
-    idx = move[1] + 1
-    until idx >= board[col].length || board[col][idx] != marker
+    row = move[1] + 1
+    until row >= board[col].length || board[col][row] != marker
       hits += 1
-      idx += 1
+      row += 1
     end
     hits
   end
@@ -95,10 +109,10 @@ class Game
     hits = 0
     marker = board[move[0]][move[1]]
     col = move[0]
-    idx = move[1] - 1
-    until idx.negative? || board[col][idx] != marker
+    row = move[1] - 1
+    until row.negative? || board[col][row] != marker
       hits += 1
-      idx -= 1
+      row -= 1
     end
     hits
   end
@@ -106,11 +120,11 @@ class Game
   def scan_left(move)
     hits = 0
     marker = board[move[0]][move[1]]
+    col = move[0] - 1
     row = move[1]
-    idx = move[0] - 1
-    until idx.negative? || board[idx][row] != marker
+    until col.negative? || board[col][row] != marker
       hits += 1
-      idx -= 1
+      col -= 1
     end
     hits
   end
@@ -118,11 +132,71 @@ class Game
   def scan_right(move)
     hits = 0
     marker = board[move[0]][move[1]]
+    col = move[0] + 1
     row = move[1]
-    idx = move[0] + 1
-    until idx >= @cols || board[idx][row] != marker
+    until col >= @cols || board[col][row] != marker
       hits += 1
-      idx += 1
+      col += 1
+    end
+    hits
+  end
+
+  def scan_left_up(move)
+    hits = 0
+    marker = board[move[0]][move[1]]
+    col = move[0] - 1
+    row = move[1] + 1
+    until col.negative? ||
+          row >= board[col].length ||
+          board[col][row] != marker
+      hits += 1
+      col -= 1
+      row += 1
+    end
+    hits
+  end
+
+  def scan_right_down(move)
+    hits = 0
+    marker = board[move[0]][move[1]]
+    col = move[0] + 1
+    row = move[1] - 1
+    until col >= @cols ||
+          row.negative? ||
+          board[col][row] != marker
+      hits += 1
+      col += 1
+      row -= 1
+    end
+    hits
+  end
+
+  def scan_right_up(move)
+    hits = 0
+    marker = board[move[0]][move[1]]
+    col = move[0] + 1
+    row = move[1] + 1
+    until col >= @cols ||
+          row >= board[col].length ||
+          board[col][row] != marker
+      hits += 1
+      col += 1
+      row += 1
+    end
+    hits
+  end
+
+  def scan_left_down(move)
+    hits = 0
+    marker = board[move[0]][move[1]]
+    col = move[0] - 1
+    row = move[1] - 1
+    until col.negative? ||
+          row.negative? ||
+          board[col][row] != marker
+      hits += 1
+      col -= 1
+      row -= 1
     end
     hits
   end
@@ -141,5 +215,14 @@ class Game
 
   def move_coords(col)
     [col - 1, board[col - 1].length - 1]
+  end
+
+  def print_board
+    @rows.times do |row_idx|
+      @cols.times do |col_idx|
+        print "|  #{board.dig(col_idx, @rows - row_idx - 1)}  "
+      end
+      print "\n_______________\n"
+    end
   end
 end

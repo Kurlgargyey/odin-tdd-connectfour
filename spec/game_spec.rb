@@ -301,7 +301,7 @@ describe Game do
       before do
         4.times { |i| 3 - i.times { game_end.board[i].push('X') } }
         4.times { |i| game_end.board[i].push('O') }
-        last_move = [3, 0]
+        last_move = [3, 3]
       end
 
       it 'returns true' do
