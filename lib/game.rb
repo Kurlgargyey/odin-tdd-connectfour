@@ -106,11 +106,10 @@ class Game
     marker = board[move[0]][move[1]]
     col_idx = move[0] + direction_col
     row_idx = move[1] + direction_row
-    while scan_valid?(col_idx, row_idx) &&
-          board[col_idx][row_idx] == marker
-      hits += 1
+    while scan_valid?(col_idx, row_idx) && board[col_idx][row_idx] == marker
       col_idx += direction_col
       row_idx += direction_row
+      hits += 1
     end
     hits
   end
