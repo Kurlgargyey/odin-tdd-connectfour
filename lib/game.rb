@@ -12,27 +12,26 @@ class Game
 
   def run_game
     turn = 0
-    turn += 1 until process_turn
+    turn += 1 until game_over?(process_turn)
     print_board
-    puts "The game ended in Turn #{turn}! #{@active_player} won."
+    if board_full?
+      puts "The game ended in Turn #{turn}! Nobody won."
+    else
+      puts "The game ended in Turn #{turn}! #{@active_player} won."
+    end
   end
 
   def process_turn
     print_board
     puts "It's #{@active_player}'s turn."
-    move = input_move
-    last_move = make_move(move)
-    return true if game_over?(last_move)
-
-    @active_player = @players.rotate![0]
-    false
+    game_over?(make_move(input_col))
   end
 
-  def input_move
-    move = -1
+  def input_col
+    col = -1
     puts 'Which column would you like to drop your marker into?'
-    move = gets.chomp.to_i until move_valid?(move)
-    move
+    col = gets.chomp.to_i until col_valid?(col)
+    col
   end
 
   def make_move(col)
@@ -41,15 +40,21 @@ class Game
       return move_coords(col)
     end
 
-    new_move = input_move
-    make_move(new_move)
+    puts 'That column is already full. Pick a different one!'
+    new_col = input_col
+    make_move(new_col)
   end
 
   def game_over?(last_move)
     return true if board_full?
     return true if connect_four?(last_move)
 
+    swap_players
     false
+  end
+
+  def swap_players
+    @active_player = @players.rotate![0]
   end
 
   def board_full?
@@ -66,8 +71,8 @@ class Game
 
   def vertical_hit?(move)
     hits = 1
-    hits += scan_up(move)
-    hits += scan_down(move)
+    hits += scan(move, 0, 1)
+    hits += scan(move, 0, -1)
     return true if hits >= 4
 
     false
@@ -75,8 +80,8 @@ class Game
 
   def horizontal_hit?(move)
     hits = 1
-    hits += scan_left(move)
-    hits += scan_right(move)
+    hits += scan(move, 1, 0)
+    hits += scan(move, -1, 0)
     return true if hits >= 4
 
     false
@@ -84,122 +89,28 @@ class Game
 
   def diagonal_hit?(move)
     hits = 1
-    hits += scan_left_up(move)
-    hits += scan_right_down(move)
+    hits += scan(move, -1, 1)
+    hits += scan(move, 1, -1)
     return true if hits >= 4
 
     hits = 1
-    hits += scan_right_up(move)
-    hits += scan_left_down(move)
+    hits += scan(move, 1, 1)
+    hits += scan(move, -1, -1)
     return true if hits >= 4
 
     false
   end
 
-  def scan_up(move)
+  def scan(move, direction_col, direction_row)
     hits = 0
     marker = board[move[0]][move[1]]
-    col = move[0]
-    row = move[1] + 1
-    until row >= board[col].length || board[col][row] != marker
+    col_idx = move[0] + direction_col
+    row_idx = move[1] + direction_row
+    while scan_valid?(col_idx, row_idx) &&
+          board[col_idx][row_idx] == marker
       hits += 1
-      row += 1
-    end
-    hits
-  end
-
-  def scan_down(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0]
-    row = move[1] - 1
-    until row.negative? || board[col][row] != marker
-      hits += 1
-      row -= 1
-    end
-    hits
-  end
-
-  def scan_left(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] - 1
-    row = move[1]
-    until col.negative? || board[col][row] != marker
-      hits += 1
-      col -= 1
-    end
-    hits
-  end
-
-  def scan_right(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] + 1
-    row = move[1]
-    until col >= @cols || board[col][row] != marker
-      hits += 1
-      col += 1
-    end
-    hits
-  end
-
-  def scan_left_up(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] - 1
-    row = move[1] + 1
-    until col.negative? ||
-          row >= board[col].length ||
-          board[col][row] != marker
-      hits += 1
-      col -= 1
-      row += 1
-    end
-    hits
-  end
-
-  def scan_right_down(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] + 1
-    row = move[1] - 1
-    until col >= @cols ||
-          row.negative? ||
-          board[col][row] != marker
-      hits += 1
-      col += 1
-      row -= 1
-    end
-    hits
-  end
-
-  def scan_right_up(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] + 1
-    row = move[1] + 1
-    until col >= @cols ||
-          row >= board[col].length ||
-          board[col][row] != marker
-      hits += 1
-      col += 1
-      row += 1
-    end
-    hits
-  end
-
-  def scan_left_down(move)
-    hits = 0
-    marker = board[move[0]][move[1]]
-    col = move[0] - 1
-    row = move[1] - 1
-    until col.negative? ||
-          row.negative? ||
-          board[col][row] != marker
-      hits += 1
-      col -= 1
-      row -= 1
+      col_idx += direction_col
+      row_idx += direction_row
     end
     hits
   end
@@ -212,8 +123,12 @@ class Game
     board[col - 1].push(@active_player)
   end
 
-  def move_valid?(move)
-    move.between?(1, @cols)
+  def col_valid?(col)
+    col.between?(1, @cols)
+  end
+
+  def scan_valid?(col_idx, row_idx)
+    col_idx.between?(0, @cols - 1) && row_idx.between?(0, board[col_idx].length)
   end
 
   def move_coords(col)

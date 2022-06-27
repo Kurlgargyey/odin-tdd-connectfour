@@ -3,6 +3,11 @@ require 'game'
 describe Game do
   subject(:game_init) { described_class.new }
 
+  before do
+    allow(subject).to receive(:print_board)
+    allow(subject).to receive(:puts)
+  end
+
   it 'has a board' do
     board = game_init.instance_variable_get(:@board)
     expect(board).not_to eq(nil)
@@ -78,7 +83,7 @@ describe Game do
     expect(game_init).to respond_to(:run_game)
   end
 
-  describe '#input_move' do
+  describe '#input_col' do
     subject(:game_input) { described_class.new }
     before do
       allow(game_input).to receive(:puts)
@@ -89,7 +94,7 @@ describe Game do
       end
 
       it 'returns the input' do
-        expect(game_input.input_move).to eql(3)
+        expect(game_input.input_col).to eql(3)
       end
     end
 
@@ -100,11 +105,11 @@ describe Game do
 
       it 'calls #gets until it receives a valid input' do
         expect(game_input).to receive(:gets).exactly(5).times
-        game_input.input_move
+        game_input.input_col
       end
 
       it 'returns the first valid input' do
-        expect(game_input.input_move).to eql(4)
+        expect(game_input.input_col).to eql(4)
       end
     end
   end
@@ -153,11 +158,11 @@ describe Game do
         new_move = 3
 
         before do
-          allow(game_move).to receive(:input_move).and_return(new_move)
+          allow(game_move).to receive(:input_col).and_return(new_move)
         end
 
         it 'asks for another move' do
-          expect(game_move).to receive(:input_move)
+          expect(game_move).to receive(:input_col)
           game_move.make_move(selected_col)
         end
 
@@ -177,11 +182,11 @@ describe Game do
 
         context 'when there is another invalid input' do
           before do
-            allow(game_move).to receive(:input_move).and_return(selected_col, new_move)
+            allow(game_move).to receive(:input_col).and_return(selected_col, new_move)
           end
 
           it 'asks for another move again' do
-            expect(game_move).to receive(:input_move).twice
+            expect(game_move).to receive(:input_col).twice
             game_move.make_move(selected_col)
           end
 
@@ -207,13 +212,14 @@ describe Game do
     subject(:game_turn) { described_class.new }
 
     before do
-      allow(game_turn).to receive(:input_move)
+      allow(game_turn).to receive(:input_col)
       allow(game_turn).to receive(:make_move)
-      allow(game_turn).to receive(:game_over?).and_return(false)
+      allow(game_turn).to receive(:board_full?).and_return(false)
+      allow(game_turn).to receive(:connect_four?).and_return(false)
     end
 
     it 'asks for a move' do
-      expect(game_turn).to receive(:input_move)
+      expect(game_turn).to receive(:input_col)
       game_turn.process_turn
     end
 
@@ -230,7 +236,7 @@ describe Game do
 
     context 'if the game ends on that turn' do
       before do
-        allow(game_turn).to receive(:game_over?).and_return(true)
+        allow(game_turn).to receive(:connect_four?).and_return(true)
       end
 
       it 'does not swap active player' do
