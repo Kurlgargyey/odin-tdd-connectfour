@@ -12,12 +12,12 @@ class Game
 
   def run_game
     turn = 0
-    turn += 1 until game_over?(process_turn)
+    turn += 1 until process_turn
     print_board
     if board_full?
       puts "The game ended in Turn #{turn}! Nobody won."
     else
-      puts "The game ended in Turn #{turn}! #{@active_player} won."
+      puts "The game ended in Turn #{turn}! The #{@active_player}s won."
     end
   end
 
@@ -137,11 +137,10 @@ class Game
 
   def print_board
     @rows.times do |row_idx|
-      @cols.times { print '+---' }
-      print "+\n"
+      puts "+---" * @cols + '+'
       @cols.times do |col_idx|
         marker = board.dig(col_idx, @rows - row_idx - 1)
-        print "| #{marker ? marker : ' '} "
+        print "| #{marker || ' '} "
       end
       print "|\n"
     end
