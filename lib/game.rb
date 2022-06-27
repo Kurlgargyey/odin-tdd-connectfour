@@ -13,11 +13,12 @@ class Game
   def run_game
     turn = 0
     turn += 1 until process_turn
-
+    print_board
     puts "The game ended in Turn #{turn}! #{@active_player} won."
   end
 
   def process_turn
+    print_board
     puts "It's #{@active_player}'s turn."
     move = input_move
     last_move = make_move(move)
@@ -221,10 +222,15 @@ class Game
 
   def print_board
     @rows.times do |row_idx|
+      @cols.times { print '+---' }
+      print "+\n"
       @cols.times do |col_idx|
-        print "|  #{board.dig(col_idx, @rows - row_idx - 1)}  "
+        marker = board.dig(col_idx, @rows - row_idx - 1)
+        print "| #{marker ? marker : ' '} "
       end
-      print "\n_______________\n"
+      print "|\n"
     end
+    @cols.times { |i| print "+-#{i + 1}-" }
+    print "+\n"
   end
 end
