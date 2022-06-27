@@ -137,7 +137,7 @@ class Game
 
   def print_board
     @rows.times do |row_idx|
-      puts "+---" * @cols + '+'
+      puts "#{'+---' * @cols}+"
       @cols.times do |col_idx|
         marker = board.dig(col_idx, @rows - row_idx - 1)
         print "| #{marker || ' '} "
